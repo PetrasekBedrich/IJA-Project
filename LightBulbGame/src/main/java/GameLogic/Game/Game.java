@@ -36,6 +36,11 @@ public class Game implements ToolEnvironment, ToolField.Observer{
         this.visited = new ArrayList<Position>();
     }
 
+    public void updateGame() {
+        resetCircuit();
+        init();
+    }
+
     private void resetCircuit() {
         visited.clear();
         for (int i = 0; i < rows; i++) {
@@ -50,7 +55,7 @@ public class Game implements ToolEnvironment, ToolField.Observer{
     public static Game create(int rows, int cols) {
         return new Game(rows, cols);
     }
-    public void init()
+    private void init()
     {
         GameNode powerSource;
         for(int i = 0; i < rows; i++)
@@ -84,6 +89,8 @@ public class Game implements ToolEnvironment, ToolField.Observer{
                 if(node.containsConnector(s))
                 {
                     var newPosition = this.getPosition(node,s);
+                    if(!isValidPosition(newPosition))
+                        continue;
                     node.TurnLightOn();
                     pathFind(this.grid[newPosition.row()-1][newPosition.col()-1], s);
                 }
@@ -199,8 +206,7 @@ public class Game implements ToolEnvironment, ToolField.Observer{
         try {
             isUpdating = true;
             if (field instanceof GameNode) {
-                resetCircuit();
-                init();
+                updateGame();
             }
         } finally {
             isUpdating = false;
