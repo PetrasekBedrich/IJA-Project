@@ -4,6 +4,7 @@ import GameLogic.Common.GameNode;
 import GameLogic.Common.GameNodeType;
 import GameLogic.Common.Position;
 import GameManager.GameManager;
+import ija.ija2024.tool.common.Observable;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -20,6 +21,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import kotlin.NotImplementedError;
@@ -53,8 +55,71 @@ public class GameController {
         // TODO: Make this dynamic
         // Probably some singleton store?
         gameManager = new GameManager(1);
+
+        registerObserverForAllNodes();
+
         createGameBoard();
     }
+
+    private void registerObserverForAllNodes() {
+        var uiObserver = new Observable.Observer() {
+            @Override
+            public void update(Observable observable) {
+                GameNode node = (GameNode) observable;
+                updateTile(node);
+            }
+        };
+
+        int rows = gameManager.game.rows();
+        int cols = gameManager.game.cols();
+
+        for (int row = 1; row <= rows; row++) {
+            for (int col = 1; col <= cols; col++) {
+                GameNode node = gameManager.game.node(new Position(row, col));
+                node.addObserver(uiObserver);
+            }
+        }
+    }
+
+    private void updateTile(GameNode node) {
+        System.out.println("Updating for "+node);
+        Position position = node.getPosition();
+        int row = position.row();
+        int col = position.col();
+
+        StackPane tile = null;
+        for (Node child : gameBoard.getChildren()) {
+            if (GridPane.getRowIndex(child) == row && GridPane.getColumnIndex(child) == col) {
+                if (child instanceof StackPane) {
+                    tile = (StackPane) child;
+                    break;
+                }
+            }
+        }
+
+        if (tile != null) {
+            tile.getChildren().removeIf(n -> n instanceof ImageView);
+
+            String imagePath = getFile(node);
+            if (imagePath != null) {
+                try {
+                    File file = new File("resources" + imagePath);
+                    Image image = new Image(file.toURI().toString());
+                    ImageView imageView = new ImageView(image);
+                    imageView.setFitWidth(64);
+                    imageView.setFitHeight(64);
+                    imageView.setPreserveRatio(true);
+                    tile.getChildren().add(imageView);
+
+                    setCorrectRotation(tile, node);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
 
     private void createGameBoard() {
         gameBoard.getChildren().clear();
@@ -100,6 +165,7 @@ public class GameController {
                     imageView.setFitHeight(64);
                     imageView.setPreserveRatio(true);
                     tile.getChildren().add(imageView);
+                    setCorrectRotation(tile, node);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -107,6 +173,68 @@ public class GameController {
         }
         return tile;
     }
+    private void setCorrectRotation(StackPane tile, GameNode node) {
+        ImageView imageView = null;
+        for (Node child : tile.getChildren()) {
+            if (child instanceof ImageView) {
+                imageView = (ImageView) child;
+                break;
+            }
+        }
+
+        if (imageView == null) return;
+
+        double rotation = 0;
+
+        if (node.isPower()) {
+            if (node.east()) rotation = 90;
+            else if (node.south()) rotation = 180;
+            else if (node.west()) rotation = 270;
+        }
+        else if (node.isBulb()) {
+            if (node.west()) rotation = 90;
+            else if (node.north()) rotation = 180;
+            else if (node.east()) rotation = 270;
+        }
+        else if (node.isLink()) {
+            if (node.north() && node.east() && node.south() && node.west()) {
+                rotation = 0;
+            }
+            else if (node.north() && node.east() && node.south() && !node.west()) {
+                rotation = 0;
+            }
+            else if (node.east() && node.south() && node.west() && !node.north()) {
+                rotation = 90;
+            }
+            else if (node.north() && node.south() && node.west() && !node.east()) {
+                rotation = 180;
+            }
+            else if (node.north() && node.east() && node.west() && !node.south()) {
+                rotation = 270;
+            }
+            else if (node.north() && node.south() && !node.east() && !node.west()) {
+                rotation = 0;
+            }
+            else if (node.east() && node.west() && !node.north() && !node.south()) {
+                rotation = 90;
+            }
+            else if (node.south() && node.east() && !node.north() && !node.west()) {
+                rotation = 0;
+            }
+            else if (node.west() && node.south() && !node.north() && !node.east()) {
+                rotation = 90;
+            }
+            else if (node.north() && node.west() && !node.south() && !node.east()) {
+                rotation = 180;
+            }
+            else if (node.north() && node.east() && !node.south() && !node.west()) {
+                rotation = 270;
+            }
+        }
+
+        imageView.setRotate(rotation);
+    }
+
     private String getFile(GameNode node)
     {
         if(node.Type == GameNodeType.NONE)
@@ -158,7 +286,7 @@ public class GameController {
     }
     private void handleTileClick(int row, int col) {
         GameNode node = gameManager.game.node(new Position(row, col));
-
+        handleGameWin();
         Node tileNode = null;
         for (Node child : gameBoard.getChildren()) {
             if (GridPane.getRowIndex(child) == row && GridPane.getColumnIndex(child) == col) {
@@ -205,21 +333,53 @@ public class GameController {
         timerLabel.setText(String.format("%02d:%02d", minutes, seconds));
     }
 
+    public void restartGame() {
+        onRestartButtonClick(null);
+    }
+
+    public void goToMainMenu() {
+        onBackButtonClick(null);
+    }
+
     private void handleGameWin() {
         timeline.stop();
-        // TODO: Implementovat dialog výhry nebo přechod na obrazovku výhry
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Modals/WinDialog.fxml"));
+            Parent root = loader.load();
+
+            WinDialogController dialogController = loader.getController();
+            dialogController.setGameController(this);
+            dialogController.setStats(formatTime(secondsElapsed), movesCount);
+
+            Scene scene = new Scene(root);
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Vítězství!");
+            dialogStage.setScene(scene);
+            dialogStage.setResizable(false);
+
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(gameBoard.getScene().getWindow());
+
+            dialogStage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private String formatTime(int seconds) {
+        int minutes = seconds / 60;
+        int remainingSeconds = seconds % 60;
+        return String.format("%02d:%02d", minutes, remainingSeconds);
     }
 
     @FXML
     private void onBackButtonClick(ActionEvent event) {
         try {
-            // Zastavit časovač
             timeline.stop();
-
-            // Přejít zpět na hlavní menu
             Parent menuView = FXMLLoader.load(getClass().getResource("MainView.fxml"));
             Scene menuScene = new Scene(menuView);
-            Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Stage window = (Stage) (gameBoard.getScene().getWindow());
             window.setScene(menuScene);
             window.show();
         } catch (IOException e) {
