@@ -286,7 +286,6 @@ public class GameController {
     }
     private void handleTileClick(int row, int col) {
         GameNode node = gameManager.game.node(new Position(row, col));
-        handleGameWin();
         Node tileNode = null;
         for (Node child : gameBoard.getChildren()) {
             if (GridPane.getRowIndex(child) == row && GridPane.getColumnIndex(child) == col) {
