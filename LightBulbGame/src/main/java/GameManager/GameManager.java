@@ -35,8 +35,8 @@ public class GameManager {
         if (node == null) {
             return;
         }
-        System.out.println("Rotating node " + pos + " into " + node);
         node.turn();
+        System.out.println("Rotating node " + pos + " into " + node);
         tracking.rotate(node.getPosition(), userClick);
     }
 

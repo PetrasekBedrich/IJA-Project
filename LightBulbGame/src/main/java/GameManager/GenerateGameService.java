@@ -36,7 +36,7 @@ public class GenerateGameService {
         game.createBulbNode(new Position(2, 1), Side.NORTH);
         game.createBulbNode(new Position(2, 2), Side.SOUTH);
         game.createLinkNode(new Position(2, 3), Side.EAST, Side.SOUTH);
-        game.createPowerNode(new Position(2, 4), Side.WEST, Side.NORTH);
+        game.createPowerNode(new Position(2, 4), Side.NORTH);
         game.createBulbNode(new Position(2, 5), Side.SOUTH);
 
         // Row 3.
@@ -70,7 +70,7 @@ public class GenerateGameService {
         game.createLinkNode(new Position(1, 1), Side.EAST, Side.SOUTH);
         game.createLinkNode(new Position(1, 2), Side.WEST, Side.SOUTH);
         game.createLinkNode(new Position(1, 3), Side.EAST, Side.SOUTH);
-        game.createPowerNode(new Position(1, 4), Side.EAST, Side.WEST, Side.SOUTH);
+        game.createPowerNode(new Position(1, 4),Side.SOUTH);
         game.createBulbNode(new Position(1, 5), Side.WEST);
         game.createBulbNode(new Position(1, 6), Side.EAST);
         game.createLinkNode(new Position(1, 7), Side.WEST, Side.SOUTH);
@@ -202,7 +202,7 @@ public class GenerateGameService {
         game.createLinkNode(new Position(6, 9), Side.WEST, Side.NORTH, Side.SOUTH);
 
         // Row 7.
-        game.createPowerNode(new Position(7, 1), Side.EAST, Side.NORTH, Side.SOUTH);
+        game.createPowerNode(new Position(7, 1), Side.SOUTH);
         game.createLinkNode(new Position(7, 2), Side.WEST, Side.SOUTH);
         game.createBulbNode(new Position(7, 3), Side.EAST);
         game.createLinkNode(new Position(7, 4), Side.EAST, Side.WEST, Side.NORTH);
