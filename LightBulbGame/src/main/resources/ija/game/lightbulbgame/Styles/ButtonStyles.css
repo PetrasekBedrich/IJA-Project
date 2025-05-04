@@ -1,0 +1,39 @@
+
+.button {
+    -fx-font-size: 14px;
+    -fx-font-family: "System";
+    -fx-padding: 8px 16px;
+}
+
+.NavigationButton {
+    -fx-background-color: #3c7fb1;
+    -fx-text-fill: white;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-min-width: 150px;
+    -fx-pref-width: 450px;
+    -fx-pref-height: 50px;
+    -fx-cursor: hand;
+}
+
+.NavigationButton:hover {
+    -fx-background-color: #4c8fc1;
+}
+
+.NavigationButton:pressed {
+    -fx-background-color: #2c6fa1;
+}
+
+.BackButton {
+    -fx-background-color: #b13c3c;
+    -fx-min-width: 100px;
+    -fx-pref-width: 100px;
+}
+
+.BackButton:hover {
+    -fx-background-color: #c14c4c;
+}
+
+.BackButton:pressed {
+    -fx-background-color: #a12c2c;
+}
