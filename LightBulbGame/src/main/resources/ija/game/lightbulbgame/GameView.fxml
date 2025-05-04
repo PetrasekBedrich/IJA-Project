@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="ija.game.lightbulbgame.GameController"
+            stylesheets="@Styles/GameStyles.css">
+
+    <top>
+        <HBox alignment="CENTER" spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Label text="Light Bulb Game" styleClass="game-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="timerLabel" text="00:00" styleClass="timer-label"/>
+            <Label fx:id="movesLabel" text="Tahy: 0" styleClass="moves-label"/>
+        </HBox>
+    </top>
+
+    <center>
+        <StackPane>
+            <!--herni plocha-->
+            <GridPane fx:id="gameBoard" alignment="CENTER"/>
+        </StackPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Button text="Zpět" onAction="#onBackButtonClick" styleClass="NavigationButton"/>
+            <Button text="Restart" onAction="#onRestartButtonClick" styleClass="NavigationButton"/>
+            <Button text="Nápověda" onAction="#onHintButtonClick" styleClass="NavigationButton"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
