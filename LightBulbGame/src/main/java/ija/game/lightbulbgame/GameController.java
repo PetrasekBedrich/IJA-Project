@@ -125,6 +125,13 @@ public class GameController {
                     e.printStackTrace();
                 }
             }
+            Label numberLabel = new Label(String.valueOf(gameManager.tracking.getCurrentStep(new Position(row,col))));
+            numberLabel.getStyleClass().add("number-label");
+            //Ensures the label stays hidden
+            numberLabel.setMinWidth(-100);
+            numberLabel.setVisible(false);
+            tile.setUserData(numberLabel);
+            tile.getChildren().add(numberLabel);
         }
     }
 
@@ -194,13 +201,15 @@ public class GameController {
 
         Label numberLabel = new Label(String.valueOf(gameManager.tracking.getCurrentStep(new Position(row,col))));
         numberLabel.getStyleClass().add("number-label");
+        //Ensures the label stays hidden
+        numberLabel.setMinWidth(-100);
         numberLabel.setVisible(false);
         tile.setUserData(numberLabel);
         tile.getChildren().add(numberLabel);
 
         return tile;
     }
-    private Boolean isHintVisible = false;
+    private Boolean showNumbers = false;
     private void setCorrectRotation(StackPane tile, GameNode node) {
         ImageView imageView = null;
         for (Node child : tile.getChildren()) {
@@ -252,6 +261,12 @@ public class GameController {
             }
             else if (node.north() && node.east() && !node.south() && !node.west()) {
                 rotation = 270;
+            }
+            else
+            {
+                if (node.east()) rotation = 90;
+                else if (node.south()) rotation = 180;
+                else if (node.west()) rotation = 270;
             }
         }
 
@@ -308,6 +323,8 @@ public class GameController {
 
     }
     private void handleTileClick(int row, int col) {
+        if(showNumbers)
+            return;
         GameNode node = gameManager.game.node(new Position(row, col));
         Node tileNode = null;
         for (Node child : gameBoard.getChildren()) {
@@ -353,10 +370,6 @@ public class GameController {
         int minutes = secondsElapsed / 60;
         int seconds = secondsElapsed % 60;
         timerLabel.setText(String.format("%02d:%02d", minutes, seconds));
-    }
-
-    public void restartGame() {
-        onRestartButtonClick(null);
     }
 
     public void goToMainMenu() {
@@ -409,27 +422,41 @@ public class GameController {
         }
     }
 
-    @FXML
-    private void onRestartButtonClick(ActionEvent event) {
-        // TODO: Reconsider if game restaring is neccessary
-        throw new NotImplementedError("Restart not implemented yet");
-
-//        movesCount = 0;
-//        secondsElapsed = 0;
-//        movesLabel.setText("Tahy: 0");
-//        timerLabel.setText("00:00");
-//
-//        createGameBoard();
-//
-//        timeline.playFromStart();
-    }
 
     @FXML
     private void onHintButtonClick(ActionEvent event) {
-        for(Node child : gameBoard.getChildren())
-        {
-            //((StackPane)child).getChildren().g
+        showNumbers = !showNumbers;
+
+        int rows = gameManager.game.rows();
+        int cols = gameManager.game.cols();
+
+        for (int row = 0; row < rows + 1; row++) {
+            for (int col = 0; col < cols + 1; col++) {
+                Node node = getNodeFromGridPane(gameBoard, col, row);
+
+                if (node instanceof StackPane) {
+                    StackPane tile = (StackPane) node;
+
+                    for (Node tileChild : tile.getChildren()) {
+                        if (tileChild instanceof Label) {
+                            Label numberLabel = (Label) tileChild;
+                            numberLabel.setVisible(showNumbers);
+                            //Plus one for the 1 based indexing of the game
+                            numberLabel.setText(gameManager.tracking.getCurrentStep(new Position(row,col)) + "");
+                        }
+                    }
+                }
+            }
         }
-        throw new NotImplementedError("Not implemented yet");
+
     }
+    private Node getNodeFromGridPane(GridPane gridPane, int col, int row) {
+        for (Node node : gridPane.getChildren()) {
+            if (GridPane.getColumnIndex(node) == col && GridPane.getRowIndex(node) == row) {
+                return node;
+            }
+        }
+        return null;
+    }
+
 }

@@ -55,13 +55,6 @@ public class WinDialogController {
         statsLabel.setText("Čas: " + time + ", Počet tahů: " + moves);
     }
 
-    @FXML
-    public void onRestartGame() {
-        closeDialog();
-        if (gameController != null) {
-            gameController.restartGame();
-        }
-    }
 
     @FXML
     public void onMainMenu() {
