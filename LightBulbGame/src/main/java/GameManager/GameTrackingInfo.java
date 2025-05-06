@@ -60,6 +60,21 @@ public class GameTrackingInfo {
         }
     }
 
+    public void rotateUndo(Position pos) {
+        int r = pos.row() - 1;
+        int c = pos.col() - 1;
+
+        if (currentSteps[r][c] == 3) {
+            currentSteps[r][c] = 0;
+        }
+        else {
+            currentSteps[r][c]++;
+        }
+
+        userClicks[r][c]--;
+        totalClicks--;
+    }
+
     public int getCurrentStep(Position pos) {
         return currentSteps[pos.row() - 1][pos.col() - 1];
     }
