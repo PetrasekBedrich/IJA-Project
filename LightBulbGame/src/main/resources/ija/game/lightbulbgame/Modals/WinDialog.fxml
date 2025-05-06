@@ -38,7 +38,6 @@
     </Label>
 
     <HBox alignment="CENTER" spacing="10">
-        <Button fx:id="restartButton" text="Hrát znovu" onAction="#onRestartGame" styleClass="game-button" />
         <Button fx:id="menuButton" text="Hlavní menu" onAction="#onMainMenu" styleClass="game-button" />
         <Button fx:id="closeButton" text="Zavřít" onAction="#onClose" styleClass="game-button" />
     </HBox>

@@ -7,7 +7,7 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="ija.game.lightbulbgame.GameController"
-            stylesheets="@Styles/GameStyles.css"
+            stylesheets="@Styles/GameStyles.css "
             minWidth="800" maxWidth="800" minHeight="800" maxHeight="800">
 
     <top>
@@ -25,7 +25,7 @@
     <center>
         <StackPane>
             <!--herni plocha-->
-            <GridPane fx:id="gameBoard" alignment="CENTER"/>
+            <GridPane fx:id="gameBoard" alignment="CENTER" stylesheets="@Styles/LabelStyles.css"/>
         </StackPane>
     </center>
 
@@ -35,7 +35,6 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <Button text="Zpět" onAction="#onBackButtonClick" styleClass="NavigationButton"/>
-            <Button text="Restart" onAction="#onRestartButtonClick" styleClass="NavigationButton"/>
             <Button text="Nápověda" onAction="#onHintButtonClick" styleClass="NavigationButton"/>
         </HBox>
     </bottom>
