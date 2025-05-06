@@ -17,10 +17,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -99,24 +97,34 @@ public class GameController {
 
         if (tile != null) {
             tile.getChildren().removeIf(n -> n instanceof ImageView);
-
+            var tileType = node.Type;
             String imagePath = getFile(node);
             if (imagePath != null) {
                 try {
+                    var wireFile = getFileForWire(node);
                     File file = new File("resources" + imagePath);
                     Image image = new Image(file.toURI().toString());
                     ImageView imageView = new ImageView(image);
-                    imageView.setFitWidth(64);
-                    imageView.setFitHeight(64);
+                    imageView.setFitWidth(tileType == GameNodeType.POWER && wireFile != null ? 32 : 64);
+                    imageView.setFitHeight(tileType == GameNodeType.POWER && wireFile != null ? 32 : 64);
                     imageView.setPreserveRatio(true);
+                    if (tileType == GameNodeType.POWER && wireFile  != null) {
+                        String backgroundImagePath = "resources" + getFileForWire(node);
+                        System.out.println("Background image path: " + backgroundImagePath);
+                        File backgroundFile = new File(backgroundImagePath);
+                        Image backgroundImage = new Image(backgroundFile.toURI().toString());
+                        ImageView backgroundImageView = new ImageView(backgroundImage);
+                        backgroundImageView.setFitWidth(64);
+                        backgroundImageView.setFitHeight(64);
+                        backgroundImageView.setPreserveRatio(true);
+                        tile.getChildren().add(backgroundImageView);
+                    }
                     tile.getChildren().add(imageView);
-
                     setCorrectRotation(tile, node);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-
         }
     }
 
@@ -158,12 +166,24 @@ public class GameController {
 
             if (imagePath != null) {
                 try {
+                    var wireFile = getFileForWire(node);
                     File file = new File("resources" + imagePath);
                     Image image = new Image(file.toURI().toString());
                     ImageView imageView = new ImageView(image);
-                    imageView.setFitWidth(64);
-                    imageView.setFitHeight(64);
+                    imageView.setFitWidth(tileType == GameNodeType.POWER && wireFile != null ? 32 : 64);
+                    imageView.setFitHeight(tileType == GameNodeType.POWER && wireFile != null ? 32 : 64);
                     imageView.setPreserveRatio(true);
+                    if (tileType == GameNodeType.POWER && wireFile  != null) {
+                        String backgroundImagePath = "resources" + getFileForWire(node);
+                        System.out.println("Background image path: " + backgroundImagePath);
+                        File backgroundFile = new File(backgroundImagePath);
+                        Image backgroundImage = new Image(backgroundFile.toURI().toString());
+                        ImageView backgroundImageView = new ImageView(backgroundImage);
+                        backgroundImageView.setFitWidth(64);
+                        backgroundImageView.setFitHeight(64);
+                        backgroundImageView.setPreserveRatio(true);
+                        tile.getChildren().add(backgroundImageView);
+                    }
                     tile.getChildren().add(imageView);
                     setCorrectRotation(tile, node);
                 } catch (Exception e) {
@@ -171,8 +191,16 @@ public class GameController {
                 }
             }
         }
+
+        Label numberLabel = new Label(String.valueOf(gameManager.tracking.getCurrentStep(new Position(row,col))));
+        numberLabel.getStyleClass().add("number-label");
+        numberLabel.setVisible(false);
+        tile.setUserData(numberLabel);
+        tile.getChildren().add(numberLabel);
+
         return tile;
     }
+    private Boolean isHintVisible = false;
     private void setCorrectRotation(StackPane tile, GameNode node) {
         ImageView imageView = null;
         for (Node child : tile.getChildren()) {
@@ -186,17 +214,12 @@ public class GameController {
 
         double rotation = 0;
 
-        if (node.isPower()) {
-            if (node.east()) rotation = 90;
-            else if (node.south()) rotation = 180;
-            else if (node.west()) rotation = 270;
-        }
-        else if (node.isBulb()) {
+        if (node.isBulb()) {
             if (node.west()) rotation = 90;
             else if (node.north()) rotation = 180;
             else if (node.east()) rotation = 270;
         }
-        else if (node.isLink()) {
+        else if (node.isLink() || node.isPower()) {
             if (node.north() && node.east() && node.south() && node.west()) {
                 rotation = 0;
             }
@@ -403,7 +426,10 @@ public class GameController {
 
     @FXML
     private void onHintButtonClick(ActionEvent event) {
-        //TODO: Implement showing remaining moves to done
+        for(Node child : gameBoard.getChildren())
+        {
+            //((StackPane)child).getChildren().g
+        }
         throw new NotImplementedError("Not implemented yet");
     }
 }
