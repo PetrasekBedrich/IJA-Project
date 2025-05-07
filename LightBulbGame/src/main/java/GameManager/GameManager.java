@@ -22,6 +22,12 @@ public class GameManager {
     private List<GameActionLogEntry> actionLog;
     private int currentStepIndex;
 
+    /**
+     * Constructs a new game based on the selected difficulty.
+     * Ensures that the game is solvable and that no bulbs are initially lit.
+     *
+     * @param difficulty the difficulty level (e.g. 1 = Easy, 2 = Medium, 3 = Hard)
+     */
     public GameManager(int difficulty) {
         this.game = GenerateGameService.generateByDifficulty(difficulty);
         this.tracking = new GameTrackingInfo(game.rows(), game.cols());
@@ -41,11 +47,23 @@ public class GameManager {
         this.tracking.saveCurrentAsInitial();
     }
 
+    /**
+     * Rotates a node and returns whether all bulbs are lit after the move.
+     *
+     * @param pos the position of the node
+     * @return true if all bulbs are lit after the move (game end)
+     */
     public boolean rotateNodeAndCheckResult(Position pos) {
         rotateNode(pos, true);
         return areEveryBulbIsLight();
     }
 
+    /**
+     * Rotates a node at the given position, logs the action, and updates tracking.
+     *
+     * @param pos the position of the node to rotate
+     * @param userClick true if the rotation was triggered by the user
+     */
     private void rotateNode(Position pos, boolean userClick) {
         GameNode node = game.node(pos);
         if (node == null) {
@@ -59,6 +77,11 @@ public class GameManager {
         tracking.rotate(node.getPosition(), userClick);
     }
 
+    /**
+     * Randomly rotates each node on the board 0 to 3 times to shuffle the puzzle.
+     *
+     * @param game the game instance to shuffle
+     */
     private void shuffleRandomNodes(Game game) {
         for (int r = 1; r <= game.rows(); r++) {
             for (int c = 1; c <= game.cols(); c++) {
@@ -71,6 +94,11 @@ public class GameManager {
         }
     }
 
+    /**
+     * Checks if all bulbs in the game are currently lit.
+     *
+     * @return true if every bulb is lit
+     */
     private boolean areEveryBulbIsLight() {
         for (int r = 1; r <= game.rows(); r++) {
             for (int c = 1; c <= game.cols(); c++) {
@@ -84,6 +112,11 @@ public class GameManager {
         return true;
     }
 
+    /**
+     * Checks if at least one bulb in the game is currently lit.
+     *
+     * @return true if any bulb is lit
+     */
     private boolean isAnyBulbIsLight() {
         for (int r = 1; r <= game.rows(); r++) {
             for (int c = 1; c <= game.cols(); c++) {
@@ -97,6 +130,12 @@ public class GameManager {
         return false;
     }
 
+    /**
+     * Switches from replay mode to live gameplay.
+     * Discards all future logged actions and rewrites the log file to current state.
+     *
+     * @param logFilePath the path to the log file
+     */
     public void switchToLiveMode(String logFilePath) {
         if (currentStepIndex < actionLog.size() - 1) {
             actionLog.subList(currentStepIndex + 1, actionLog.size()).clear();
@@ -105,14 +144,28 @@ public class GameManager {
         GameLogger.truncateToCurrentStep(actionLog, currentStepIndex, game.rows(), game.cols());
     }
 
+    /**
+     * Checks whether an undo operation is currently possible.
+     *
+     * @return true if undo can be performed
+     */
     public boolean canUndo() {
         return currentStepIndex >= 0;
     }
 
+    /**
+     * Checks whether a redo operation is currently possible.
+     *
+     * @return true if redo can be performed
+     */
     public boolean canRedo() {
         return currentStepIndex + 1 < actionLog.size();
     }
 
+    /**
+     * Undoes the last action by rotating the node back
+     * and adjusting the tracking state accordingly.
+     */
     public void undo() {
         if (currentStepIndex < 0) return;
 
@@ -126,6 +179,10 @@ public class GameManager {
         currentStepIndex--;
     }
 
+    /**
+     * Redoes the next action by rotating the node forward
+     * and updating the tracking state.
+     */
     public void redo() {
         if (currentStepIndex + 1 >= actionLog.size()) return;
 
@@ -138,6 +195,13 @@ public class GameManager {
         currentStepIndex++;
     }
 
+    /**
+     * Loads a game from a log file, reconstructs all nodes and state,
+     * and replays all logged actions to restore the last known state.
+     *
+     * @param filename the path to the log file
+     * @throws IOException if reading the file fails
+     */
     public void loadFromLogAndRecreateGame(String filename) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(filename));
         int rows = 0, cols = 0;
