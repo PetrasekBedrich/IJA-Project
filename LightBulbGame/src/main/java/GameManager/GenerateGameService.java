@@ -9,6 +9,14 @@ import GameLogic.Common.*;
 import GameLogic.Game.Game;
 
 public class GenerateGameService {
+    /**
+     * Generates a new game instance based on the selected difficulty level.
+     * The board is generated with predefined layouts for each difficulty.
+     *
+     * @param difficulty the difficulty level (1 = Easy, 2 = Medium, 3 = Hard)
+     * @return a newly created game instance for the given difficulty
+     * @throws IllegalArgumentException if an unknown difficulty is provided
+     */
     public static Game generateByDifficulty(int difficulty) {
         Game newGame = switch (difficulty) {
             case 1 -> generateEasyGame();
@@ -22,6 +30,11 @@ public class GenerateGameService {
         return newGame;
     }
 
+    /**
+     * Creates and returns a predefined 5×5 game board for the Easy difficulty.
+     *
+     * @return a game instance containing the easy layout
+     */
     private static Game generateEasyGame() {
         Game game = Game.create(5, 5);
 
@@ -63,6 +76,11 @@ public class GenerateGameService {
         return game;
     }
 
+    /**
+     * Creates and returns a predefined 7×7 game board for the Medium difficulty.
+     *
+     * @return a game instance containing the medium layout
+     */
     private static Game generateMediumGame() {
         Game game = Game.create(7, 7);
 
@@ -132,6 +150,11 @@ public class GenerateGameService {
         return game;
     }
 
+    /**
+     * Creates and returns a predefined 9×9 game board for the Hard difficulty.
+     *
+     * @return a game instance containing the hard layout
+     */
     private static Game generateHardGame() {
         Game game = Game.create(9, 9);
 
