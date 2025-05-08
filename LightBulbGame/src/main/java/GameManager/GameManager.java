@@ -23,28 +23,38 @@ public class GameManager {
     private int currentStepIndex;
 
     /**
-     * Constructs a new game based on the selected difficulty.
-     * Ensures that the game is solvable and that no bulbs are initially lit.
+     * Constructs a new game manager and either creates a new game or loads a saved one.
+     * If a new game is created, it is shuffled and logged; otherwise the last game is reconstructed from log.
      *
-     * @param difficulty the difficulty level (e.g. 1 = Easy, 2 = Medium, 3 = Hard)
+     * @param difficulty the difficulty level (1 = Easy, 2 = Medium, 3 = Hard)
+     * @param createNewGame true to generate a new game; false to load from log file
      */
-    public GameManager(int difficulty) {
-        this.game = GenerateGameService.generateByDifficulty(difficulty);
-        this.tracking = new GameTrackingInfo(game.rows(), game.cols());
-        this.actionLog = new ArrayList<>();
-        this.currentStepIndex = -1;
+    public GameManager(int difficulty, boolean createNewGame) {
+        if (createNewGame) {
+            this.game = GenerateGameService.generateByDifficulty(difficulty);
+            this.tracking = new GameTrackingInfo(game.rows(), game.cols());
+            this.actionLog = new ArrayList<>();
+            this.currentStepIndex = -1;
 
-        try {
-            GameLogger.saveInitialGameState(game);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
+            try {
+                GameLogger.saveInitialGameState(game);
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
+
+            while (isAnyBulbIsLight()) {
+                shuffleRandomNodes(this.game);
+            }
+            this.tracking.saveCurrentAsInitial();
+            GameLogger.endInitialState();
         }
-
-        while (isAnyBulbIsLight()) {
-            shuffleRandomNodes(this.game);
+        else {
+            try {
+                this.loadFromLogAndRecreateGame();
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
         }
-
-        this.tracking.saveCurrentAsInitial();
     }
 
     /**
@@ -69,10 +79,15 @@ public class GameManager {
         if (node == null) {
             return;
         }
-        System.out.println("Rotating node " + pos + " into " + node);
-        node.turn();
 
+        node.turn();
         GameLogger.appendTurn(node);
+
+        if (userClick) {
+            GameActionLogEntry entry = new GameActionLogEntry(pos, node.toString());
+            actionLog.add(entry);
+            currentStepIndex++;
+        }
 
         tracking.rotate(node.getPosition(), userClick);
     }
@@ -89,6 +104,7 @@ public class GameManager {
                 int times = rand.nextInt(4);
                 for (int i = 0; i < times; i++) {
                     rotateNode(pos, false);
+                    GameLogger.addInitialGameTurn(game.node(pos));
                 }
             }
         }
@@ -133,15 +149,15 @@ public class GameManager {
     /**
      * Switches from replay mode to live gameplay.
      * Discards all future logged actions and rewrites the log file to current state.
-     *
-     * @param logFilePath the path to the log file
      */
-    public void switchToLiveMode(String logFilePath) {
+    public void switchToLiveMode() {
         if (currentStepIndex < actionLog.size() - 1) {
             actionLog.subList(currentStepIndex + 1, actionLog.size()).clear();
         }
 
         GameLogger.truncateToCurrentStep(actionLog, currentStepIndex, game.rows(), game.cols());
+        actionLog.clear();
+        currentStepIndex = -1;
     }
 
     /**
@@ -196,14 +212,14 @@ public class GameManager {
     }
 
     /**
-     * Loads a game from a log file, reconstructs all nodes and state,
-     * and replays all logged actions to restore the last known state.
+     * Loads a game from a log file, reconstructs the board, and replays actions
+     * that occurred after the initial state. Differentiates between setup and gameplay using
+     * an "END INITIAL STATE" marker.
      *
-     * @param filename the path to the log file
-     * @throws IOException if reading the file fails
+     * @throws IOException if reading the log file fails
      */
-    public void loadFromLogAndRecreateGame(String filename) throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get(filename));
+    public void loadFromLogAndRecreateGame() throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get("log.txt"));
         int rows = 0, cols = 0;
 
         List<GameActionLogEntry> log = new ArrayList<>();
@@ -241,9 +257,14 @@ public class GameManager {
             }
         }
 
+        boolean initialStateDone = false;
+
         // 3. Make turns.
         for (String line : lines) {
-            if (!line.startsWith("TURN")) continue;
+            if (line.equals("END INITIAL STATE")) {
+                initialStateDone = true;
+            }
+            else if (!line.startsWith("TURN")) continue;
 
             Matcher m = pattern.matcher(line.substring(5));
             if (m.matches()) {
@@ -252,11 +273,13 @@ public class GameManager {
                 Position pos = new Position(row, col);
                 GameNode node = game.node(pos);
 
-                GameActionLogEntry entry = new GameActionLogEntry(pos, node.toString());
-                log.add(entry);
+                if (initialStateDone) {
+                    GameActionLogEntry entry = new GameActionLogEntry(pos, node.toString());
+                    log.add(entry);
+                }
 
                 node.turn();
-                tracking.rotate(pos, false);
+                tracking.rotate(pos, initialStateDone);
             }
         }
 

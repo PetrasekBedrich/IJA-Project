@@ -9,7 +9,7 @@ import GameLogic.Common.Position;
 
 public class GameActionLogEntry {
     private final Position position;
-    private final String nodeStateBefore; // výsledek node.toString() před otočením
+    private final String nodeStateBefore;
 
     /**
      * Constructs a new log entry representing a node rotation.
@@ -29,15 +29,6 @@ public class GameActionLogEntry {
      */
     public Position getPosition() {
         return position;
-    }
-
-    /**
-     * Returns the string representation of the node before it was rotated.
-     *
-     * @return the original state of the node as a string
-     */
-    public String getNodeStateBefore() {
-        return nodeStateBefore;
     }
 
     /**

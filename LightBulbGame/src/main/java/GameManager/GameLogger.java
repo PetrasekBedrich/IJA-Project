@@ -34,13 +34,23 @@ public class GameLogger {
                 for (int c = 1; c <= game.cols(); c++) {
                     GameNode node = game.node(new Position(r, c));
                     if (node != null) {
-                        String nodeLine = "NODE {" + node.toString() + "}";
+                        String nodeLine = "NODE " + node.toString();
                         out.println(nodeLine);
                         initialNodeLines.add(nodeLine);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Adds a TURN entry to the in-memory initial log list.
+     * Used before the actual game starts, to record rotations done during generation/shuffling.
+     *
+     * @param node the game node that was rotated before gameplay started
+     */
+    public static void addInitialGameTurn(GameNode node) {
+        initialNodeLines.add("TURN " + node.toString());
     }
 
     /**
@@ -52,6 +62,18 @@ public class GameLogger {
     public static void appendTurn(GameNode node) {
         try (PrintWriter out = new PrintWriter(new FileWriter(logFile, true))) {
             out.println("TURN " + node.toString());
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Appends a marker line to the log file indicating the end of the initial game setup section.
+     * This separates node definitions from user actions in the log.
+     */
+    public static void endInitialState() {
+        try (PrintWriter out = new PrintWriter(new FileWriter(logFile, true))) {
+            out.println("END INITIAL STATE");
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
@@ -75,30 +97,13 @@ public class GameLogger {
                 out.println(nodeLine);
             }
 
+            out.println("END INITIAL STATE");
+
             for (int i = 0; i <= currentStepIndex; i++) {
                 out.println(actionLog.get(i).toString());
             }
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
-    }
-
-    /**
-     * Returns the list of initial NODE lines representing the board state
-     * at the beginning of the game.
-     *
-     * @return list of NODE log lines
-     */
-    public List<String> getInitialNodeLines() {
-        return initialNodeLines;
-    }
-
-    /**
-     * Returns the log file object used for logging game events.
-     *
-     * @return the File instance of the log file
-     */
-    public File getLogFile() {
-        return logFile;
     }
 }

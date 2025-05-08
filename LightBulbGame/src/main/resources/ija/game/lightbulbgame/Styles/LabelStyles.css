@@ -1,0 +1,8 @@
+.number-label {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: yellow;
+    -fx-padding: 2px;
+    -fx-background-radius: 3px;
+    -fx-background-color: black;
+}

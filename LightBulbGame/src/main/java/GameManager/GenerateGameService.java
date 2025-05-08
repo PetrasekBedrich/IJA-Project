@@ -49,7 +49,7 @@ public class GenerateGameService {
         game.createBulbNode(new Position(2, 1), Side.NORTH);
         game.createBulbNode(new Position(2, 2), Side.SOUTH);
         game.createLinkNode(new Position(2, 3), Side.EAST, Side.SOUTH);
-        game.createPowerNode(new Position(2, 4), Side.WEST, Side.NORTH);
+        game.createPowerNode(new Position(2, 4), Side.WEST, Side.SOUTH);
         game.createBulbNode(new Position(2, 5), Side.SOUTH);
 
         // Row 3.
