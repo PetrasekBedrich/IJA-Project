@@ -9,7 +9,7 @@
 <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="ija.game.lightbulbgame.DifficultySelectorController"
       stylesheets="@Styles/ButtonStyles.css"
-      minWidth="800" maxWidth="800" minHeight="800" maxHeight="800">
+      minWidth="800" maxWidth="800" minHeight="600" maxHeight="600">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>

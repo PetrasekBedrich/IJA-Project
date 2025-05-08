@@ -8,7 +8,7 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="ija.game.lightbulbgame.GameController"
             stylesheets="@Styles/GameStyles.css "
-            minWidth="800" maxWidth="800" minHeight="800" maxHeight="800">
+            minWidth="800" maxWidth="800" minHeight="600" maxHeight="600">
 
     <top>
         <HBox alignment="CENTER" spacing="10">
@@ -34,8 +34,11 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <Button text="Zpět" onAction="#onBackButtonClick" styleClass="NavigationButton"/>
+            <Button text="Hlavní menu" onAction="#onBackButtonClick" styleClass="NavigationButton"/>
+            <Button fx:id="undoButton" text="Zpět" onAction="#onUndoButtonClick" styleClass="NavigationButton"/>
+            <Button fx:id="redoButton" text="Dopředu" onAction="#onRedoButtonClick" styleClass="NavigationButton"/>
             <Button text="Nápověda" onAction="#onHintButtonClick" styleClass="NavigationButton"/>
+            <Button fx:id="playButton" text="Hrát z tohoto stavu" onAction="#onPlayButtonClick" styleClass="NavigationButton"/>
         </HBox>
     </bottom>
 

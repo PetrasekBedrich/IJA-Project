@@ -12,6 +12,12 @@ import kotlin.NotImplementedError;
 import java.io.IOException;
 
 public class MainController {
+    /**
+     * Handles the click event for the "New Game" button.
+     * Opens the difficulty selection view.
+     *
+     * @param event the triggered action event
+     */
     @FXML
     protected void onNewGameButtonClick(ActionEvent event) {
         try {
@@ -22,13 +28,30 @@ public class MainController {
             window.setScene(difficultyScene);
             window.show();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
+    /**
+     * Handles the click event for the "Load Game" button.
+     * Loads the saved game from the log file and opens the game view.
+     *
+     * @param event the triggered action event
+     */
     @FXML
-    protected void onLoadGameButtonClick() {
-        throw new NotImplementedError("Not implemented yet");
-    }
+    protected void onLoadGameButtonClick(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("GameView.fxml"));
+            Parent root = loader.load();
 
+            GameController controller = loader.getController();
+            controller.setDifficulty(1, false);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+    }
 }

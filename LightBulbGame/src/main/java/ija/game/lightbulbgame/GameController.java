@@ -14,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,13 +23,11 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import kotlin.NotImplementedError;
 
 import java.io.File;
 import java.io.IOException;
 
 public class GameController {
-
     @FXML
     private GridPane gameBoard;
 
@@ -38,27 +37,64 @@ public class GameController {
     @FXML
     private Label movesLabel;
 
-    private Timeline timeline;
-    private int secondsElapsed = 0;
-    private int movesCount = 0;
-
-    private GameManager gameManager;
+    @FXML
+    private Button undoButton;
 
     @FXML
-    public void initialize() {
-        timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateTimer()));
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
+    private Button redoButton;
 
-        // TODO: Make this dynamic
-        // Probably some singleton store?
-        gameManager = new GameManager(1);
+    @FXML
+    private Button playButton;
 
-        registerObserverForAllNodes();
+    private Timeline timeline;
+    private int secondsElapsed = 0;
+    private GameManager gameManager;
+    private int difficulty;
+    private boolean canPlay;
 
-        createGameBoard();
+    /**
+     * Sets the game difficulty and initializes the game view.
+     *
+     * @param difficulty the selected difficulty level
+     * @param createNewGame true if a new game should be created, false to load from log
+     */
+    public void setDifficulty(int difficulty, boolean createNewGame) {
+        this.difficulty = difficulty;
+        init(createNewGame);
     }
 
+    /**
+     * Initializes the game state, UI bindings, and logic.
+     * Starts the timer and prepares the game board.
+     *
+     * @param createNewGame true if a new game is being started
+     */
+    public void init(boolean createNewGame) {
+        timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateTimer()));
+        timeline.setCycleCount(Animation.INDEFINITE);
+
+        if (createNewGame) {
+            timeline.play();
+            playButton.setVisible(false);
+            canPlay = true;
+        }
+        else {
+            playButton.setVisible(true);
+            canPlay = false;
+        }
+
+        gameManager = new GameManager(difficulty, createNewGame);
+
+        registerObserverForAllNodes();
+        createGameBoard();
+        updateMoves();
+        updateButtonStates();
+    }
+
+    /**
+     * Registers a UI observer on every game node to update tiles
+     * when a node's state changes.
+     */
     private void registerObserverForAllNodes() {
         var uiObserver = new Observable.Observer() {
             @Override
@@ -79,8 +115,12 @@ public class GameController {
         }
     }
 
+    /**
+     * Updates the tile's image and state based on the given game node.
+     *
+     * @param node the game node to reflect in the UI
+     */
     private void updateTile(GameNode node) {
-        System.out.println("Updating for "+node);
         Position position = node.getPosition();
         int row = position.row();
         int col = position.col();
@@ -110,7 +150,6 @@ public class GameController {
                     imageView.setPreserveRatio(true);
                     if (tileType == GameNodeType.POWER && wireFile  != null) {
                         String backgroundImagePath = "resources" + getFileForWire(node);
-                        System.out.println("Background image path: " + backgroundImagePath);
                         File backgroundFile = new File(backgroundImagePath);
                         Image backgroundImage = new Image(backgroundFile.toURI().toString());
                         ImageView backgroundImageView = new ImageView(backgroundImage);
@@ -122,7 +161,7 @@ public class GameController {
                     tile.getChildren().add(imageView);
                     setCorrectRotation(tile, node);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.err.println(e.getMessage());
                 }
             }
             Label numberLabel = new Label(String.valueOf(gameManager.tracking.getCurrentStep(new Position(row,col))));
@@ -135,7 +174,9 @@ public class GameController {
         }
     }
 
-
+    /**
+     * Creates and populates the game board grid with tiles and click handlers.
+     */
     private void createGameBoard() {
         gameBoard.getChildren().clear();
         gameBoard.getRowConstraints().clear();
@@ -154,13 +195,25 @@ public class GameController {
 
                 StackPane tile = createTile(row, col);
 
-                tile.setOnMouseClicked(event -> handleTileClick(r, c));
+                tile.setOnMouseClicked(event -> {
+                    if (!canPlay) {
+                        return;
+                    }
+                    handleTileClick(r, c);
+                });
 
                 gameBoard.add(tile, col, row);
             }
         }
     }
 
+    /**
+     * Creates a visual tile for a specific cell in the game board grid.
+     *
+     * @param row the row index
+     * @param col the column index
+     * @return the configured StackPane tile
+     */
     private StackPane createTile(int row, int col) {
         StackPane tile = new StackPane();
         tile.getStyleClass().add("game-tile");
@@ -182,7 +235,6 @@ public class GameController {
                     imageView.setPreserveRatio(true);
                     if (tileType == GameNodeType.POWER && wireFile  != null) {
                         String backgroundImagePath = "resources" + getFileForWire(node);
-                        System.out.println("Background image path: " + backgroundImagePath);
                         File backgroundFile = new File(backgroundImagePath);
                         Image backgroundImage = new Image(backgroundFile.toURI().toString());
                         ImageView backgroundImageView = new ImageView(backgroundImage);
@@ -194,7 +246,7 @@ public class GameController {
                     tile.getChildren().add(imageView);
                     setCorrectRotation(tile, node);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.err.println(e.getMessage());
                 }
             }
         }
@@ -209,7 +261,15 @@ public class GameController {
 
         return tile;
     }
+
     private Boolean showNumbers = false;
+
+    /**
+     * Sets the correct image rotation for the tile based on node connections.
+     *
+     * @param tile the tile to rotate
+     * @param node the game node providing connection data
+     */
     private void setCorrectRotation(StackPane tile, GameNode node) {
         ImageView imageView = null;
         for (Node child : tile.getChildren()) {
@@ -219,7 +279,9 @@ public class GameController {
             }
         }
 
-        if (imageView == null) return;
+        if (imageView == null) {
+            return;
+        }
 
         double rotation = 0;
 
@@ -273,32 +335,39 @@ public class GameController {
         imageView.setRotate(rotation);
     }
 
+    /**
+     * Returns the image path for a given node based on its type and state.
+     *
+     * @param node the game node
+     * @return relative path to the image file
+     */
     private String getFile(GameNode node)
     {
-        if(node.Type == GameNodeType.NONE)
-            System.out.println("NONE");
-        if(node.Type == GameNodeType.POWER)
+        if (node.Type == GameNodeType.POWER) {
             return "/Battery.png";
-        if(node.Type == GameNodeType.BULB)
-        {
-            if(node.light())
-            {
+        }
+        if (node.Type == GameNodeType.BULB) {
+            if(node.light()) {
                 return "/LightBulbOn.png";
             }
-            else
-            {
+            else {
                 return "/LightBulbOff.png";
             }
         }
-        else if(node.Type == GameNodeType.LINK)
-        {
+        else if (node.Type == GameNodeType.LINK) {
             return getFileForWire(node);
         }
-        else
-        {
+        else {
             return "";
         }
     }
+
+    /**
+     * Returns the image path for a wire based on the number and direction of connections.
+     *
+     * @param node the game node representing a wire
+     * @return relative path to the wire image or null if invalid
+     */
     private String getFileForWire(GameNode node)
     {
         int connectionCount = 0;
@@ -320,8 +389,15 @@ public class GameController {
         } else {
             return null;
         }
-
     }
+
+    /**
+     * Handles the user clicking a tile, applies rotation, updates game state,
+     * and checks for a win condition.
+     *
+     * @param row the row of the clicked tile
+     * @param col the column of the clicked tile
+     */
     private void handleTileClick(int row, int col) {
         if(showNumbers)
             return;
@@ -334,8 +410,7 @@ public class GameController {
             }
         }
 
-        if (tileNode instanceof StackPane) {
-            StackPane tile = (StackPane) tileNode;
+        if (tileNode instanceof StackPane tile) {
 
             ImageView wireImageView = null;
             for (Node child : tile.getChildren()) {
@@ -356,15 +431,31 @@ public class GameController {
 
         boolean solved = gameManager.rotateNodeAndCheckResult(new Position(row, col));
 
-        movesCount++;
-        movesLabel.setText("Tahy: " + movesCount);
+        updateMoves();
 
         if (solved) {
             handleGameWin();
         }
     }
 
+    /**
+     * Updates the UI label showing the number of user moves.
+     */
+    private void updateMoves() {
+        movesLabel.setText("Tahy: " + gameManager.tracking.getTotalClicks());
+    }
 
+    /**
+     * Enables or disables the undo/redo buttons based on available actions.
+     */
+    private void updateButtonStates() {
+        undoButton.setDisable(isUndoDisable());
+        redoButton.setDisable(isRedoDisable());
+    }
+
+    /**
+     * Updates the timer label every second to show elapsed play time.
+     */
     private void updateTimer() {
         secondsElapsed++;
         int minutes = secondsElapsed / 60;
@@ -372,10 +463,16 @@ public class GameController {
         timerLabel.setText(String.format("%02d:%02d", minutes, seconds));
     }
 
+    /**
+     * Shortcut method to trigger returning to the main menu.
+     */
     public void goToMainMenu() {
-        onBackButtonClick(null);
+        onBackButtonClick();
     }
 
+    /**
+     * Handles game win logic: stops timer and shows a win dialog with stats.
+     */
     private void handleGameWin() {
         timeline.stop();
 
@@ -385,7 +482,7 @@ public class GameController {
 
             WinDialogController dialogController = loader.getController();
             dialogController.setGameController(this);
-            dialogController.setStats(formatTime(secondsElapsed), movesCount);
+            dialogController.setStats(formatTime(secondsElapsed), gameManager.tracking.getTotalClicks());
 
             Scene scene = new Scene(root);
             Stage dialogStage = new Stage();
@@ -399,17 +496,41 @@ public class GameController {
             dialogStage.showAndWait();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
+
+    /**
+     * Formats a time value in seconds into MM:SS string format.
+     *
+     * @param seconds total elapsed time in seconds
+     * @return formatted string in mm:ss format
+     */
     private String formatTime(int seconds) {
         int minutes = seconds / 60;
         int remainingSeconds = seconds % 60;
         return String.format("%02d:%02d", minutes, remainingSeconds);
     }
 
+    /**
+     * Handles switching from replay mode to live gameplay when play is clicked.
+     *
+     * @param event the action event
+     */
     @FXML
-    private void onBackButtonClick(ActionEvent event) {
+    private void onPlayButtonClick(ActionEvent event) {
+        timeline.play();
+        gameManager.switchToLiveMode();
+        canPlay = true;
+        updateButtonStates();
+        playButton.setVisible(false);
+    }
+
+    /**
+     * Handles returning from the game view to the main menu.
+     */
+    @FXML
+    private void onBackButtonClick() {
         try {
             timeline.stop();
             Parent menuView = FXMLLoader.load(getClass().getResource("MainView.fxml"));
@@ -418,11 +539,40 @@ public class GameController {
             window.setScene(menuScene);
             window.show();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
+    /**
+     * Performs an undo action, updates moves and UI button states.
+     *
+     * @param event the action event
+     */
+    @FXML
+    private void onUndoButtonClick(ActionEvent event) {
+        timeline.stop();
+        gameManager.undo();
+        updateMoves();
+        updateButtonStates();
+    }
 
+    /**
+     * Performs a redo action, updates moves and UI button states.
+     *
+     * @param event the action event
+     */
+    @FXML
+    private void onRedoButtonClick(ActionEvent event) {
+        gameManager.redo();
+        updateMoves();
+        updateButtonStates();
+    }
+
+    /**
+     * Toggles display of step hints (remaining rotations) over each tile.
+     *
+     * @param event the action event
+     */
     @FXML
     private void onHintButtonClick(ActionEvent event) {
         showNumbers = !showNumbers;
@@ -434,12 +584,9 @@ public class GameController {
             for (int col = 0; col < cols + 1; col++) {
                 Node node = getNodeFromGridPane(gameBoard, col, row);
 
-                if (node instanceof StackPane) {
-                    StackPane tile = (StackPane) node;
-
+                if (node instanceof StackPane tile) {
                     for (Node tileChild : tile.getChildren()) {
-                        if (tileChild instanceof Label) {
-                            Label numberLabel = (Label) tileChild;
+                        if (tileChild instanceof Label numberLabel) {
                             numberLabel.setVisible(showNumbers);
                             //Plus one for the 1 based indexing of the game
                             numberLabel.setText(gameManager.tracking.getCurrentStep(new Position(row,col)) + "");
@@ -448,15 +595,41 @@ public class GameController {
                 }
             }
         }
-
     }
+
+    /**
+     * Checks whether the undo button should be disabled.
+     *
+     * @return true if undo is not available
+     */
+    private boolean isUndoDisable() {
+        return !gameManager.canUndo();
+    }
+
+    /**
+     * Checks whether the redo button should be disabled.
+     *
+     * @return true if redo is not available
+     */
+    private boolean isRedoDisable() {
+        return !gameManager.canRedo();
+    }
+
+    /**
+     * Returns the node located at the specified column and row in the given GridPane.
+     *
+     * @param gridPane the grid pane to search
+     * @param col the column index (0-based)
+     * @param row the row index (0-based)
+     * @return the node at the given position, or null if none found
+     */
     private Node getNodeFromGridPane(GridPane gridPane, int col, int row) {
         for (Node node : gridPane.getChildren()) {
             if (GridPane.getColumnIndex(node) == col && GridPane.getRowIndex(node) == row) {
                 return node;
             }
         }
+
         return null;
     }
-
 }
