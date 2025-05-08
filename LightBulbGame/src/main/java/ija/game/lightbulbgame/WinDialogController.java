@@ -35,7 +35,7 @@ public class WinDialogController {
     @FXML
     public void initialize() {
         try {
-            File file = new File("resources/LightBulbOn.png");
+            File file = new File("lib/resources/LightBulbOn.png");
             Image image = new Image(file.toURI().toString());
             ImageView imageView = new ImageView(image);
             imageView.setFitHeight(64);

@@ -8,7 +8,7 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="ija.game.lightbulbgame.GameController"
             stylesheets="@Styles/GameStyles.css "
-            minWidth="800" maxWidth="800" minHeight="600" maxHeight="600">
+            minWidth="800" maxWidth="800" minHeight="800" maxHeight="800">
 
     <top>
         <HBox alignment="CENTER" spacing="10">

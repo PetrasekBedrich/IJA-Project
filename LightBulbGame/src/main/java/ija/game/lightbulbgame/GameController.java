@@ -150,14 +150,14 @@ public class GameController {
             if (imagePath != null) {
                 try {
                     var wireFile = getFileForWire(node);
-                    File file = new File("resources" + imagePath);
+                    File file = new File("lib/resources" + imagePath);
                     Image image = new Image(file.toURI().toString());
                     ImageView imageView = new ImageView(image);
                     imageView.setFitWidth(tileType == GameNodeType.POWER && wireFile != null ? 32 : 64);
                     imageView.setFitHeight(tileType == GameNodeType.POWER && wireFile != null ? 32 : 64);
                     imageView.setPreserveRatio(true);
                     if (tileType == GameNodeType.POWER && wireFile  != null) {
-                        String backgroundImagePath = "resources" + getFileForWire(node);
+                        String backgroundImagePath = "lib/resources" + getFileForWire(node);
                         File backgroundFile = new File(backgroundImagePath);
                         Image backgroundImage = new Image(backgroundFile.toURI().toString());
                         ImageView backgroundImageView = new ImageView(backgroundImage);
@@ -235,14 +235,14 @@ public class GameController {
             if (imagePath != null) {
                 try {
                     var wireFile = getFileForWire(node);
-                    File file = new File("resources" + imagePath);
+                    File file = new File("lib/resources" + imagePath);
                     Image image = new Image(file.toURI().toString());
                     ImageView imageView = new ImageView(image);
                     imageView.setFitWidth(tileType == GameNodeType.POWER && wireFile != null ? 32 : 64);
                     imageView.setFitHeight(tileType == GameNodeType.POWER && wireFile != null ? 32 : 64);
                     imageView.setPreserveRatio(true);
                     if (tileType == GameNodeType.POWER && wireFile  != null) {
-                        String backgroundImagePath = "resources" + getFileForWire(node);
+                        String backgroundImagePath = "lib/resources" + getFileForWire(node);
                         File backgroundFile = new File(backgroundImagePath);
                         Image backgroundImage = new Image(backgroundFile.toURI().toString());
                         ImageView backgroundImageView = new ImageView(backgroundImage);
