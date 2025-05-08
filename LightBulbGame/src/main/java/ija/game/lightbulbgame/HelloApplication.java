@@ -1,3 +1,10 @@
+/**
+ * IJA Project
+ * @author Bedřich Petrášek (xpetra31)
+ * @Description Entry point of the Light Bulb Game JavaFX application.
+ *              Launches the JavaFX runtime and displays the main menu screen.
+ */
+
 package ija.game.lightbulbgame;
 
 import javafx.application.Application;

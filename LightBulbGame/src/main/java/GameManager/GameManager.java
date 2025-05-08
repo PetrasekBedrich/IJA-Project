@@ -1,6 +1,9 @@
 /**
  * IJA Project
  * @author Tomáš Boudný (xboudn05)
+ * @Description Manages the lifecycle of a game instance.
+ *              Handles game creation, shuffling, move execution, undo/redo,
+ *              replay loading from log, and transition to live gameplay.
  */
 
 package GameManager;

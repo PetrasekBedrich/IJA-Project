@@ -1,6 +1,9 @@
 /**
  * IJA Project
  * @author Tomáš Boudný (xboudn05)
+ * @Description Provides tracking for user interactions with the game.
+ *              Stores the number of rotations needed for each tile,
+ *              actual user clicks, and supports undo/redo operations.
  */
 
 package GameManager;

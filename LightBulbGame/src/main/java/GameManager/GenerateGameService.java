@@ -1,6 +1,9 @@
 /**
  * IJA Project
  * @author Tomáš Boudný (xboudn05)
+ * @Description Provides static methods to generate predefined game boards
+ *              for different difficulty levels (Easy, Medium, Hard).
+ *              Each board is created with a fixed layout suitable for testing and gameplay.
  */
 
 package GameManager;

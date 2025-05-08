@@ -1,3 +1,10 @@
+/**
+ * IJA Project
+ * @author Bedřich Petrášek (xpetra31)
+ * @Description Controller for the win dialog that appears when the player finishes the game.
+ *              Displays game statistics, allows return to the main menu or closing the dialog.
+ */
+
 package ija.game.lightbulbgame;
 
 import javafx.fxml.FXML;

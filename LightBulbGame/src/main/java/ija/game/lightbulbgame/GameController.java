@@ -1,3 +1,11 @@
+/**
+ * IJA Project
+ * @author Bedřich Petrášek (xpetra31)
+ * @Description JavaFX controller for the main game view.
+ *              Handles game initialization, UI updates, user interaction (tile clicks, undo/redo),
+ *              game timer, and win condition logic. Coordinates with GameManager and renders the game board.
+ */
+
 package ija.game.lightbulbgame;
 
 import GameLogic.Common.GameNode;

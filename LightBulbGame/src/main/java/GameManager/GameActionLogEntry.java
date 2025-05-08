@@ -1,6 +1,8 @@
 /**
  * IJA Project
  * @author Tomáš Boudný (xboudn05)
+ * @Description Represents a single log entry in the game action log.
+ *              Stores the position and original state of a node before rotation.
  */
 
 package GameManager;

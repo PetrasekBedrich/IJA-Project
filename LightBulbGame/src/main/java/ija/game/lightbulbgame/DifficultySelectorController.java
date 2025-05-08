@@ -1,3 +1,11 @@
+/**
+ * IJA Project
+ * @author Bedřich Petrášek (xpetra31)
+ * @Description Controller for the difficulty selection screen.
+ *              Allows the user to choose Easy, Medium, or Hard difficulty
+ *              and navigates to the appropriate game view.
+ */
+
 package ija.game.lightbulbgame;
 
 import javafx.event.ActionEvent;
@@ -7,7 +15,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import kotlin.NotImplementedError;
 
 import java.io.IOException;
 

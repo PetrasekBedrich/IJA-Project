@@ -1,3 +1,10 @@
+/**
+ * IJA Project
+ * @author Bedřich Petrášek (xpetra31)
+ * @Description Controller for the main menu screen.
+ *              Provides actions for starting a new game or loading a previously saved game.
+ */
+
 package ija.game.lightbulbgame;
 
 import javafx.event.ActionEvent;
@@ -7,7 +14,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import kotlin.NotImplementedError;
 
 import java.io.IOException;
 

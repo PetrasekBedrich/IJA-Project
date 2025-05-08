@@ -1,6 +1,9 @@
 /**
  * IJA Project
  * @author Tomáš Boudný (xboudn05)
+ * @Description Responsible for logging the game's progress to a file.
+ *              Handles saving the initial state, recording rotations, and truncating logs
+ *              when switching between replay and live play modes.
  */
 
 package GameManager;
